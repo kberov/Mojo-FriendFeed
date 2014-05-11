@@ -75,19 +75,14 @@ $ff->on( entry => sub {
   my $data = parse($entry->{body});
   
   my $msg = $data->{text} . " http://metacpan.org/release/$data->{pause_id}/$data->{dist}-$data->{version}";
-  say $msg;
-  p $data;
+  #p $data;
 
   my @deps = @{ $data->{deps} || [] };
 
   for my $job (@{ $conf{jobs} }) {
-    if (my $filter = $job->{dist}) {
-      next unless $data->{dist} =~ $filter;
-    }
-    if (my $filter = $job->{deps}) {
-      next unless first { $_ =~ $filter } @deps;
-    }
-    $irc->$send( $job->{channel} => $msg );
+    next unless ($data->{dist}=~ $job->{dist} ||(first {$_ =~ $job->{deps} } @deps));
+    say $msg;
+    #$irc->$send( $job->{channel} => $msg );
   }
 });
 
